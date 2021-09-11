@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <!--*-->
+    <id>BlueByte.SOLIDWORKS.Extensions</id>
+    <!--*-->
+    <version>2021.17.0</version>
+    <title>BlueByte.SOLIDWORKS.Extensions</title>
+    <!--*-->
+    <authors>Blue Byte Systems, Inc.</authors>
+    <owners>Blue Byte Systems, Inc.</owners>
+    <!--
+    <licenseUrl></licenseUrl>
+    <projectUrl></projectUrl>
+    <iconUrl></iconUrl>
+-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--*-->
+    <description>Extension methods and wrapper classes for SOLIDWORKS API.</description>
+    <!--*-->
+    <releaseNotes>Extension methods and wrapper classes for SOLIDWORKS API.</releaseNotes>
+    <copyright>Copyright ©  2021</copyright>
+    <tags>
+    </tags>
+    <dependencies>
+      <!--
+      <dependency id="SampleDependency" version="1.0" />
+-->
+    </dependencies>
+  </metadata>
+</package>
