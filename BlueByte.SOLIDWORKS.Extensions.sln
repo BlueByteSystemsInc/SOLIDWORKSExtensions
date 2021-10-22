@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueByte.SOLIDWORKS.Extensions", "BlueByte.SOLIDWORKS.Extensions.csproj", "{EC7CE01B-F6A6-4654-9D2C-C8AEEEDF172D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "..\Tests\Tests.csproj", "{12586516-0C39-4215-A686-D8C03E6BF1C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{12586516-0C39-4215-A686-D8C03E6BF1C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
