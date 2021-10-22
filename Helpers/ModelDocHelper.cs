@@ -170,29 +170,65 @@ namespace BlueByte.SOLIDWORKS.Helpers
         /// <returns></returns>
         public static double[] CreateBoundingBox(this ModelDoc2 swModelDoc)
         {
-            var boolstatus = swModelDoc.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swViewDispGlobalBBox, true);
+            string value;
+            string resolvedvalue;
+            double factor = 1000.0;
+            var ar = new List<double>();
+
+            var lengtUnit = (swLengthUnit_e)swModelDoc.LengthUnit;
+            switch (lengtUnit)
+            {
+                case swLengthUnit_e.swMM:
+                    factor = 1 / 1000.0;
+                    break;
+                case swLengthUnit_e.swCM:
+                    factor = 1 / 100.0;
+                    break;
+                case swLengthUnit_e.swMETER:
+                    factor = 1;
+                    break;
+                case swLengthUnit_e.swINCHES:
+                    factor = 1 / 39.37;
+                    break;
+                case swLengthUnit_e.swFEET:
+                    factor = 1 / 3.281;
+                    break;
+                case swLengthUnit_e.swFEETINCHES:
+                    factor = 1 / 3.281;
+                    break;
+                case swLengthUnit_e.swUIN:
+                case swLengthUnit_e.swANGSTROM:
+                case swLengthUnit_e.swNANOMETER:
+                case swLengthUnit_e.swMICRON:
+                case swLengthUnit_e.swMIL:
+                default:
+                    throw new NotImplementedException($"Conversion from {lengtUnit.ToString()} to meters not implemented by this method");
+            }
+
+
+            var configurationName = swModelDoc.ConfigurationManager.ActiveConfiguration.Name;
 
             Feature BoundingBox;
             int longstatus = 0;
 
-            BoundingBox = swModelDoc.FeatureManager.InsertGlobalBoundingBox((int)swGlobalBoundingBoxFitOptions_e.swBoundingBoxType_BestFit, true, false, out longstatus) as Feature;
+            var features = swModelDoc.FeatureManager.GetFeatures(true) as object[];
+            var swfeatures = features.Cast<Feature>();
+            var bbFeature = swfeatures.FirstOrDefault(x => x.GetTypeName() == "BoundingBox");
+            if (bbFeature == null)
+            {
+                var boolstatus = swModelDoc.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swViewDispGlobalBBox, true);
+                BoundingBox = swModelDoc.FeatureManager.InsertGlobalBoundingBox((int)swGlobalBoundingBoxFitOptions_e.swBoundingBoxType_BestFit, true, false, out longstatus) as Feature;
+                boolstatus = swModelDoc.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swViewDispGlobalBBox, false);
+            }
 
-            boolstatus = swModelDoc.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swViewDispGlobalBBox, false);
+            swModelDoc.Extension.CustomPropertyManager[configurationName].Get2("Total Bounding Box Width", out value, out resolvedvalue);
+            ar.Add(double.Parse(resolvedvalue) * factor);
 
-            string value;
-            string resolvedvalue;
+            swModelDoc.Extension.CustomPropertyManager[configurationName].Get2("Total Bounding Box Thickness", out value, out resolvedvalue);
+            ar.Add(double.Parse(resolvedvalue) * factor);
 
-            var ar = new List<double>();
-
-
-            swModelDoc.Extension.CustomPropertyManager["Default"].Get2("Total Bounding Box Width", out value, out resolvedvalue);
-            ar.Add(double.Parse(resolvedvalue) / 1000.0);
-
-            swModelDoc.Extension.CustomPropertyManager["Default"].Get2("Total Bounding Box Thickness", out value, out resolvedvalue);
-            ar.Add(double.Parse(resolvedvalue) / 1000.0);
-
-            swModelDoc.Extension.CustomPropertyManager["Default"].Get2("Total Bounding Box Length", out value, out resolvedvalue);
-            ar.Add(double.Parse(resolvedvalue) / 1000.0);
+            swModelDoc.Extension.CustomPropertyManager[configurationName].Get2("Total Bounding Box Length", out value, out resolvedvalue);
+            ar.Add(double.Parse(resolvedvalue) * factor);
 
             return ar.ToArray();
 
@@ -388,17 +424,7 @@ namespace BlueByte.SOLIDWORKS.Helpers
             return featureL.ToArray();
 
         }
-        enum PointPosition
-        {
-            One,
-            Two,
-            Three,
-            Four,
-            Five,
-            Six,
-            Seven,
-            Eight
-        }
+      
 
 
 
