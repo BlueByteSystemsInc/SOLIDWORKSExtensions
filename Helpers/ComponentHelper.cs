@@ -70,6 +70,24 @@ namespace BlueByte.SOLIDWORKS.Helpers
             var pathName = component.GetPathName();
             return ModelDocHelper.GetSOLIDWORKSDocumentType(pathName);
         }
+
+        //public static List<Body> GetBodies(this Feature feature)
+        //{
+        //    var subFeature = default(Feature);
+        //    var swComponent = feature.GetSpecificFeature2() as Component2;
+        //    if (swComponent != null)
+        //    {
+        //        var componentBodies = (swComponent.GetBodies2((int)swBodyType_e.swAllBodies) as object[]).Cast<Body>().ToList();
+                
+        //        subFeature = swComponent.FirstFeature();
+
+        //        while (subFeature != null)
+        //        {
+        //            GetModelDocs(subFeature);
+        //            subFeature = subFeature.GetNextFeature() as Feature;
+        //        }
+        //    }
+        //}
     }
     public static class MateHelper
     {

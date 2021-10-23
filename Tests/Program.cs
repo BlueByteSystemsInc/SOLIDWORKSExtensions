@@ -2,19 +2,17 @@
 using BlueByte.SOLIDWORKS.Helpers;
 using SolidWorks.Interop.sldworks;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tests
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
-        {
+        #region Private Methods
 
-            var fileName = @"C:\Users\jlili\Desktop\34492454\34492454.sldasm";
+        private static void Main(string[] args)
+        {
+            var fileName = @"C:\Users\alexe\Desktop\TestAssemlby.SLDASM";
             var manager = new SOLIDWORKSInstanceManager();
             var swApp = default(SldWorks);
 
@@ -29,62 +27,52 @@ namespace Tests
                     swApp = manager.GetSOLIDWORKSInstanceFromProcessID(process.Id);
                     if (swApp != null)
                     {
-
                         swApp.Visible = true;
-
-                        string[] errors;
-                        string[] warnings;
-                        if (string.IsNullOrWhiteSpace(fileName) == false)
-                            openRet = swApp.OpenDocument(fileName, out errors, out warnings, SolidWorks.Interop.swconst.swOpenDocOptions_e.swOpenDocOptions_Silent);
-                        Tests.Do(openRet.Item2);
                     }
-
+                    else return;
                 }
                 else
                 {
                     swApp = manager.GetNewInstance("", 60);
                     swApp.Visible = true;
-
-                    string[] errors;
-                    string[] warnings;
-                    if (string.IsNullOrWhiteSpace(fileName) == false)
-                        openRet = swApp.OpenDocument(fileName, out errors, out warnings, SolidWorks.Interop.swconst.swOpenDocOptions_e.swOpenDocOptions_Silent);
-
-                    Tests.Do(openRet.Item2);
                 }
+            }
+
+            string[] errors;
+            string[] warnings;
+            var swModel = swApp.ActiveDoc as ModelDoc2;
+            if (swModel == null)
+            {
+                openRet = swApp.OpenDocument(fileName, out errors, out warnings, SolidWorks.Interop.swconst.swOpenDocOptions_e.swOpenDocOptions_Silent);
+                Tests.Do(openRet.Item2);
             }
             else
             {
-
-                swApp = manager.GetNewInstance("", 60);
-                swApp.Visible = true;
-                string[] errors;
-                string[] warnings;
-                if (string.IsNullOrWhiteSpace(fileName) == false)
-                    openRet  = swApp.OpenDocument(fileName, out errors, out warnings, SolidWorks.Interop.swconst.swOpenDocOptions_e.swOpenDocOptions_Silent);
-
-                Tests.Do(openRet.Item2);
+                Tests.Do(swModel);
             }
 
         }
 
-
-
-
+        #endregion
     }
-
 
     public class Tests
     {
+        #region Public Methods
+
         public static void Do(SldWorks swApp)
         {
-
         }
+
         public static void Do(ModelDoc2 modelDoc2)
         {
             // create bounding box
-            var data = modelDoc2.CreateBoundingBox();
+            //var data = modelDoc2.CreateBoundingBox();
+            //modelDoc2.CreateRefPlanesAroundBoundingBox(data);  
+            double[] data = null;
             modelDoc2.CreateRefPlanesAroundBoundingBox(data);
         }
+
+        #endregion
     }
 }
