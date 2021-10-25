@@ -43,9 +43,6 @@ namespace BlueByte.SOLIDWORKS.Helpers
                         break;
                 }
 
-                if (c.IGetChildrenCount() > 0)
-                    return;
-
                 var componentModel = c.GetModelDoc() as ModelDoc2;
 
                 if (componentModel == null)
@@ -55,10 +52,14 @@ namespace BlueByte.SOLIDWORKS.Helpers
                     var pathName = componentModel.GetPathName();
                     if (string.IsNullOrWhiteSpace(pathName))
                         return;
-                    object infos;
-                    var arr_bodies = (c.GetBodies3((int)swBodyType_e.swAllBodies, out infos) as object[]);
+
+                    var arr_bodies = (c.GetBodies2((int)swBodyType_e.swAllBodies) as object[]);
                     if (arr_bodies != null)
                     {
+
+                        if (pathName.Contains("32610980"))
+                            System.Diagnostics.Debugger.Break();
+
                         var swBodies = arr_bodies.Cast<Body2>().ToList();
                         var transform = c.Transform2;
                         foreach (var swBody in swBodies)
@@ -124,7 +125,7 @@ namespace BlueByte.SOLIDWORKS.Helpers
                     maxZ = z;
 
                 swBody.GetExtremePoint(0, 0, -1, out x, out y, out z);
-                if (i == 0 || x < minZ)
+                if (i == 0 || z < minZ)
                     minZ = z;
 
 

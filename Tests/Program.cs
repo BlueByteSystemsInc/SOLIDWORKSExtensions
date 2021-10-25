@@ -14,7 +14,7 @@ namespace Tests
         private static void Main(string[] args)
         {
 
-            var amenLocalFileName = @"C:\Users\jlili\Desktop\34492454\wrapper.sldasm";
+            var amenLocalFileName = @"C:\SOLIDWORKSPDM\Bluebyte\API\Knapheide\a_assemblies\A_80017120.sldasm";
             var fileName = @"C:\Users\alexe\Desktop\TestAssemlby.SLDASM";
             var manager = new SOLIDWORKSInstanceManager();
             var swApp = default(SldWorks);
