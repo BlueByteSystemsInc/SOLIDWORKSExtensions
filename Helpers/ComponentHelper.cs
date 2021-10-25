@@ -57,9 +57,6 @@ namespace BlueByte.SOLIDWORKS.Helpers
                     if (arr_bodies != null)
                     {
 
-                        if (pathName.Contains("32610980"))
-                            System.Diagnostics.Debugger.Break();
-
                         var swBodies = arr_bodies.Cast<Body2>().ToList();
                         var transform = c.Transform2;
                         foreach (var swBody in swBodies)
