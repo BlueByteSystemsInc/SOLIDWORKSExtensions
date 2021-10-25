@@ -2,6 +2,7 @@
 using BlueByte.SOLIDWORKS.Helpers;
 using SolidWorks.Interop.sldworks;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Tests
@@ -12,6 +13,8 @@ namespace Tests
 
         private static void Main(string[] args)
         {
+
+            var amenLocalFileName = @"C:\Users\jlili\Desktop\34492454\wrapper.sldasm";
             var fileName = @"C:\Users\alexe\Desktop\TestAssemlby.SLDASM";
             var manager = new SOLIDWORKSInstanceManager();
             var swApp = default(SldWorks);
@@ -21,10 +24,15 @@ namespace Tests
 
             if (processes != null)
             {
+#if Local_Amen
+                fileName = amenLocalFileName;
+#endif 
+
                 var process = processes.FirstOrDefault();
                 if (process != null)
                 {
                     swApp = manager.GetSOLIDWORKSInstanceFromProcessID(process.Id);
+                    swApp.CommandInProgress = true;
                     if (swApp != null)
                     {
                         swApp.Visible = true;
@@ -34,6 +42,7 @@ namespace Tests
                 else
                 {
                     swApp = manager.GetNewInstance("", 60);
+                    swApp.CommandInProgress = true;
                     swApp.Visible = true;
                 }
             }
@@ -44,35 +53,51 @@ namespace Tests
             if (swModel == null)
             {
                 openRet = swApp.OpenDocument(fileName, out errors, out warnings, SolidWorks.Interop.swconst.swOpenDocOptions_e.swOpenDocOptions_Silent);
-                Tests.Do(openRet.Item2);
+                Tests.Do(swApp, openRet.Item2);
+                swApp.CommandInProgress = true;
             }
             else
             {
-                Tests.Do(swModel);
+                Tests.Do(swApp, swModel);
+                swApp.CommandInProgress = false;
             }
 
         }
 
-        #endregion
+#endregion
     }
 
     public class Tests
     {
-        #region Public Methods
+#region Public Methods
 
         public static void Do(SldWorks swApp)
         {
         }
 
-        public static void Do(ModelDoc2 modelDoc2)
+        public static void Do(SldWorks swApp, ModelDoc2 modelDoc2)
         {
-            // create bounding box
-            //var data = modelDoc2.CreateBoundingBox();
-            //modelDoc2.CreateRefPlanesAroundBoundingBox(data);  
-            double[] data = null;
-            modelDoc2.CreateRefPlanesAroundBoundingBox(data);
+
+            var timer = new Stopwatch();
+
+            timer.Start();
+
+            swApp.CommandInProgress = true;
+
+            var component = ((modelDoc2 as AssemblyDoc).GetComponents(true) as Object[]).Cast<Component2>().FirstOrDefault();
+            modelDoc2.CreateRefPlanesAroundBoundingBoxAroundComponent(component);
+
+
+
+            swApp.CommandInProgress = false;
+
+            timer.Stop();
+
+
+            Console.WriteLine(timer.Elapsed.ToString());
+
         }
 
-        #endregion
+#endregion
     }
 }
