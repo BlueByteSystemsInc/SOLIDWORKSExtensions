@@ -15,6 +15,148 @@ namespace BlueByte.SOLIDWORKS.Helpers
     }
     public static class ComponentHelper
     {
+        /// <summary>
+        /// Gets tighest fit box.
+        /// </summary>
+        /// <param name="component">The component.</param>
+        /// <returns></returns>
+        public static double[] GetTighestFitBox(this Component2 component)
+        {
+            if (component == null)
+                throw new ArgumentNullException(nameof(component));
+
+            if (component.IsLoaded() == false)
+                throw new Exception($"{nameof(GetTighestFitBox)} failed because {component.Name} is not loaded in memory");
+
+            var bodies = new List<Body2>();
+            TraverseComponentForComponents(component, (Component2 c) => {
+
+                var cVisibility = (swComponentVisibilityState_e)c.Visible;
+
+                switch (cVisibility)
+                {
+                    case swComponentVisibilityState_e.swComponentHidden:
+                        return;
+                    case swComponentVisibilityState_e.swComponentVisible:
+                    case swComponentVisibilityState_e.swComponentUnknown:
+                    default:
+                        break;
+                }
+
+                if (c.IGetChildrenCount() > 0)
+                    return;
+
+                var componentModel = c.GetModelDoc() as ModelDoc2;
+
+                if (componentModel == null)
+                    return;
+                else
+                {
+                    var pathName = componentModel.GetPathName();
+                    if (string.IsNullOrWhiteSpace(pathName))
+                        return;
+                    object infos;
+                    var arr_bodies = (c.GetBodies3((int)swBodyType_e.swAllBodies, out infos) as object[]);
+                    if (arr_bodies != null)
+                    {
+                        var swBodies = arr_bodies.Cast<Body2>().ToList();
+                        var transform = c.Transform2;
+                        foreach (var swBody in swBodies)
+                        {
+
+                            var cCopy = swBody.Copy() as Body2;
+                            var appliedTransform = cCopy.ApplyTransform(transform);
+                            // math transform 
+                            bodies.Add(cCopy);
+
+
+                        }
+                    }
+                }
+
+            });
+
+            double maxX = 0;
+            double minX = 0;
+            double maxY = 0;
+            double minY = 0;
+            double maxZ = 0;
+            double minZ = 0;
+
+            double x = 0;
+            double y = 0;
+            double z = 0;
+
+
+
+            for (int i = 0; i < bodies.Count; i++)
+            {
+
+
+
+                var swBody = bodies[i];
+
+
+
+                swBody.GetExtremePoint(1, 0, 0, out x, out y, out z);
+                if (i == 0 || x > maxX)
+                    maxX = x;
+
+
+                swBody.GetExtremePoint(-1, 0, 0, out x, out y, out z);
+                if (i == 0 || x < minX)
+                    minX = x;
+
+
+                swBody.GetExtremePoint(0, 1, 0, out x, out y, out z);
+                if (i == 0 || y > maxY)
+                    maxY = y;
+
+
+                swBody.GetExtremePoint(0, -1, 0, out x, out y, out z);
+                if (i == 0 || y < minY)
+                    minY = y;
+
+
+
+                swBody.GetExtremePoint(0, 0, 1, out x, out y, out z);
+                if (i == 0 || z > maxZ)
+                    maxZ = z;
+
+                swBody.GetExtremePoint(0, 0, -1, out x, out y, out z);
+                if (i == 0 || x < minZ)
+                    minZ = z;
+
+
+            }
+
+            var extremes = new double[6] { minX, minY, minZ, maxX, maxY, maxZ };
+
+
+            return extremes;
+        }
+
+        public static void TraverseComponentForComponents(this Component2 component, Action<Component2> performAction)
+        {
+
+            var swComponent = component;
+            if (swComponent != null)
+            {
+                performAction(swComponent);
+
+                var components = swComponent.GetChildren() as object[];
+                if (components != null)
+                    foreach (var child in components)
+                    {
+                        TraverseComponentForComponents((child as Component2), performAction);
+
+                    }
+
+            }
+
+
+        }
+
 
         public static void SetColor(this Component2 component, Color color)
         {

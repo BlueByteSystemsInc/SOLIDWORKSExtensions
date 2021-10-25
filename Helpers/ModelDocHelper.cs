@@ -105,44 +105,72 @@ namespace BlueByte.SOLIDWORKS.Helpers
             return ar.ToArray();
         }
 
-        public static Feature[] CreateRefPlanesAroundBoundingBox(this ModelDoc2 swModel, double[] arr)
+        public static void TraverseFeatureForComponents(this Feature swFeature, Action<Component2> performAction)
         {
-            var feature = swModel.FirstFeature() as Feature;
+            var swSubFeature = default(Feature);
+
+            var swComponent = swFeature.GetSpecificFeature2() as Component2;
+            if (swComponent != null)
+            {
+                performAction(swComponent);
+
+                swSubFeature = swComponent.FirstFeature();
+                while (swSubFeature != null)
+                {
+                    TraverseFeatureForComponents(swSubFeature, performAction);
+                    swSubFeature = swSubFeature.GetNextFeature() as Feature;
+                }
+            }
+
+
+        }
 
 
 
-            double Width = arr.First();
-            double Thickness = arr[1];
-            double length = arr.Last();
+        /// <summary>
+        /// Creates top, bottom, right, left, front and back planes around the tightest fit bounding box of the component.
+        /// </summary>
+        /// <param name="swModel">The sw model.</param>
+        /// <param name="component">The component.</param>
+        /// <returns></returns>
+        public static Feature[] CreateRefPlanesAroundBoundingBoxAroundComponent(this ModelDoc2 swModel, Component2 component)
+        {
+    
+            double maxX = 0;
+            double minX = 0;
+            double maxY = 0;
+            double minY = 0;
+            double maxZ = 0;
+            double minZ = 0;
+
+            
+
+            var box = component.GetTighestFitBox();
+
+
+
+            minX = box[0];
+            minY = box[1];
+            minZ = box[2];
+            maxX = box[3];
+            maxY = box[4];
+            maxZ = box[5];
 
             swModel.SketchManager.Insert3DSketch(true);
             swModel.SketchManager.AddToDB = true;
 
-
-            //var firstSketchPoint = swModel.SketchManager.CreatePoint(Width * 0.5, Thickness * 0.5, length * 0.5);
-            //var secondSketchPoint = swModel.SketchManager.CreatePoint(Width * 0.5, Thickness * 0.5, -length * 0.5);
-            //var thirdSketchPoint = swModel.SketchManager.CreatePoint(Width * 0.5, -Thickness * 0.5, length * 0.5);
-            //var fourthSketchPoint = swModel.SketchManager.CreatePoint(Width * 0.5, -Thickness * 0.5, -length * 0.5);
-            //var fithSketchPoint = swModel.SketchManager.CreatePoint(-Width * 0.5, Thickness * 0.5, -length * 0.5);
-
-            //var sixthSketchPoint = swModel.SketchManager.CreatePoint(-Width * 0.5, Thickness * 0.5, length * 0.5);
-
-            //var seventhSketchPoint = swModel.SketchManager.CreatePoint(-Width * 0.5, -Thickness * 0.5, length * 0.5);
-            //var eightSketchPoint = swModel.SketchManager.CreatePoint(-Width * 0.5, -Thickness * 0.5, -length * 0.5);
-            
-            var firstSketchPoint = swModel.SketchManager.CreatePoint(Width * 0.5, Thickness * 0.5, length * 0.5);
-            var secondSketchPoint = swModel.SketchManager.CreatePoint(Width * 0.5, Thickness * 0.5, -length * 0.5);
-            var thirdSketchPoint = swModel.SketchManager.CreatePoint(Width * 0.5, -Thickness * 0.5, length * 0.5);
-            var fourthSketchPoint = swModel.SketchManager.CreatePoint(Width * 0.5, -Thickness * 0.5, -length * 0.5);
-            var fithSketchPoint = swModel.SketchManager.CreatePoint(-Width * 0.5, Thickness * 0.5, -length * 0.5);
-
-            var sixthSketchPoint = swModel.SketchManager.CreatePoint(-Width * 0.5, Thickness * 0.5, length * 0.5);
-
-            var seventhSketchPoint = swModel.SketchManager.CreatePoint(-Width * 0.5, -Thickness * 0.5, length * 0.5);
-            var eightSketchPoint = swModel.SketchManager.CreatePoint(-Width * 0.5, -Thickness * 0.5, -length * 0.5);
+            var firstSketchPoint = swModel.SketchManager.CreatePoint(maxX, maxY, maxZ);
+            var secondSketchPoint = swModel.SketchManager.CreatePoint(maxX, maxY,  minZ);
+ 
+            var thirdSketchPoint = swModel.SketchManager.CreatePoint(maxX, minY,maxZ);
+            var fourthSketchPoint = swModel.SketchManager.CreatePoint(maxX, minY, minZ);
+            var fithSketchPoint = swModel.SketchManager.CreatePoint(minX, maxY, minZ);
+            var sixthSketchPoint = swModel.SketchManager.CreatePoint(minX, maxY, maxZ);
+            var seventhSketchPoint = swModel.SketchManager.CreatePoint(minX, minY, maxZ);
+            var eightSketchPoint = swModel.SketchManager.CreatePoint(minX, minY, minZ);
 
             swModel.SketchManager.AddToDB = false;
-            swModel.SketchManager.InsertSketch(true);
+            swModel.SketchManager.Insert3DSketch(true);
 
             var lastFeature = swModel.Extension.GetLastFeatureAdded();
 
@@ -220,6 +248,9 @@ namespace BlueByte.SOLIDWORKS.Helpers
             midPlane.Name = "mid_plane";
             featureL.Add(midPlane);
 
+
+
+            
             return featureL.ToArray();
         }
 
