@@ -79,6 +79,7 @@
     <Compile Include="Helpers\ComponentHelper.cs" />
     <Compile Include="Helpers\ModelDocHelper.cs" />
     <Compile Include="Helpers\SelectionHelper.cs" />
+    <Compile Include="Helpers\SldWorksHelper.cs" />
     <Compile Include="ISOLIDWORKSInstanceManager.cs" />
     <Compile Include="Helpers\MaterialHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

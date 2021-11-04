@@ -1,7 +1,10 @@
 ﻿using BlueByte.SOLIDWORKS.Extensions;
+using BlueByte.SOLIDWORKS.Extensions.Helpers;
 using BlueByte.SOLIDWORKS.Helpers;
+using Microsoft.Win32;
 using SolidWorks.Interop.sldworks;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -41,9 +44,12 @@ namespace Tests
                 }
                 else
                 {
-                    swApp = manager.GetNewInstance("", 60);
+                    
+                    swApp = manager.GetNewInstance("/b /r", 60,true);
                     swApp.CommandInProgress = true;
                     swApp.Visible = true;
+
+                    
                 }
             }
 
@@ -73,7 +79,10 @@ namespace Tests
 
         public static void Do(SldWorks swApp)
         {
+
         }
+
+        
 
         public static void Do(SldWorks swApp, ModelDoc2 modelDoc2)
         {

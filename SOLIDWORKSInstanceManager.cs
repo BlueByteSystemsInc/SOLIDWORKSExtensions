@@ -1,12 +1,17 @@
-﻿using SolidWorks.Interop.sldworks;
+﻿using BlueByte.SOLIDWORKS.Extensions.Helpers;
+using Microsoft.Win32;
+using SolidWorks.Interop.sldworks;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security;
 using System.Security.Principal;
+using System.Threading;
 
 namespace BlueByte.SOLIDWORKS.Extensions
 {
@@ -85,10 +90,43 @@ namespace BlueByte.SOLIDWORKS.Extensions
             return swApp;
         }
 
-       /// <summary>
-       /// Attempts to restart SOLIDWORKS.
-       /// </summary>
-       /// <param name="swApp"></param>
+        /// <summary>
+        /// Creates a new instance of SOLIDWORKS.
+        /// </summary>
+        /// <param name="commandlineParameters">Commandline parameters.</param>
+        /// <param name="timeout">Timeout.</param>
+        /// <param name="unloadaddins">if set to <c>true</c> [unloadaddins].</param>
+        /// <param name="waittimeForAddInsToLoadInSeconds">The wait time for add ins to load in seconds.</param>
+        /// <returns></returns>
+        /// <exception cref="System.Exception">Failed to unload add-ins.</exception>
+        public SldWorks GetNewInstance(string commandlineParameters = "", int timeout = 30, bool unloadaddins = false, int waittimeForAddInsToLoadInSeconds = 30)
+        {
+            var swApp = Extension.CreateSldWorks(commandlineParameters, timeout);
+
+
+            if (unloadaddins)
+            {
+                try
+                {
+                    swApp.Visible = true;
+                    swApp.UnloadAddIns(waittimeForAddInsToLoadInSeconds);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Failed to unload add-ins", e);
+                }
+            }
+
+
+            return swApp;
+        }
+
+      
+
+        /// <summary>
+        /// Attempts to restart SOLIDWORKS.
+        /// </summary>
+        /// <param name="swApp"></param>
         public void RestartInstance(ref SldWorks swApp, string commandLineParameters = "", int timeout = 30, int attempts = 5)
         {
             if (attempts <= 2)
