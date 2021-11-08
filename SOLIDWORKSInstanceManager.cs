@@ -19,6 +19,7 @@ namespace BlueByte.SOLIDWORKS.Extensions
 
     public class SOLIDWORKSInstanceManager : ISOLIDWORKSInstanceManager
     {
+        public const string startSWNoJournalDialogAndSuppressAllDialogs = "/r /b";
 
         [DllImport("ole32.dll")]
         public static extern int GetRunningObjectTable(int reserved, out IRunningObjectTable port);
@@ -84,27 +85,19 @@ namespace BlueByte.SOLIDWORKS.Extensions
         /// <param name="suppressDialog">Suppress any dialogs.</param>
         /// <param name="timeout">30 seconds for time out.</param>
         /// <returns></returns>
-        public SldWorks GetNewInstance(string commandlineParameters = "", int timeout = 30)
+        public SldWorks GetNewInstance(string commandlineParameters = "/r /b", int timeout = 30)
         {
             var swApp = Extension.CreateSldWorks(commandlineParameters, timeout);
             return swApp;
         }
 
-        /// <summary>
-        /// Creates a new instance of SOLIDWORKS.
-        /// </summary>
-        /// <param name="commandlineParameters">Commandline parameters.</param>
-        /// <param name="timeout">Timeout.</param>
-        /// <param name="unloadaddins">if set to <c>true</c> [unloadaddins].</param>
-        /// <param name="waittimeForAddInsToLoadInSeconds">The wait time for add ins to load in seconds.</param>
-        /// <returns></returns>
-        /// <exception cref="System.Exception">Failed to unload add-ins.</exception>
-        public SldWorks GetNewInstance(string commandlineParameters = "", int timeout = 30, bool unloadaddins = false)
+     
+        public SldWorks GetNewInstance(out Exception unloadaddinsException, bool unloadAddins = false, string commandlineArgs = startSWNoJournalDialogAndSuppressAllDialogs, int timeoutInSeconds = 30)
         {
-            var swApp = Extension.CreateSldWorks(commandlineParameters, timeout);
+            var swApp = Extension.CreateSldWorks(commandlineArgs, timeoutInSeconds);
 
 
-            if (unloadaddins)
+            if (unloadAddins)
             {
                 try
                 {
@@ -114,11 +107,12 @@ namespace BlueByte.SOLIDWORKS.Extensions
                 }
                 catch (Exception e)
                 {
-                    throw new Exception("Failed to unload add-ins", e);
+                    unloadaddinsException = e;
+                    return swApp;
                 }
             }
 
-
+            unloadaddinsException = null;
             return swApp;
         }
 
