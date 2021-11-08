@@ -99,7 +99,7 @@ namespace BlueByte.SOLIDWORKS.Extensions
         /// <param name="waittimeForAddInsToLoadInSeconds">The wait time for add ins to load in seconds.</param>
         /// <returns></returns>
         /// <exception cref="System.Exception">Failed to unload add-ins.</exception>
-        public SldWorks GetNewInstance(string commandlineParameters = "", int timeout = 30, bool unloadaddins = false, int waittimeForAddInsToLoadInSeconds = 30)
+        public SldWorks GetNewInstance(string commandlineParameters = "", int timeout = 30, bool unloadaddins = false)
         {
             var swApp = Extension.CreateSldWorks(commandlineParameters, timeout);
 
@@ -109,7 +109,8 @@ namespace BlueByte.SOLIDWORKS.Extensions
                 try
                 {
                     swApp.Visible = true;
-                    swApp.UnloadAddIns(waittimeForAddInsToLoadInSeconds);
+                    List<string> disabledAddIns = null;
+                    SldWorksHelper.UnloadAddIns(out disabledAddIns);
                 }
                 catch (Exception e)
                 {
