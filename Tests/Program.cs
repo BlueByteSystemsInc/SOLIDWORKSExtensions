@@ -45,7 +45,7 @@ namespace Tests
                 else
                 {
                     
-                    swApp = manager.GetNewInstance("/b /r", 60,true);
+                    swApp = manager.GetNewInstance("/b /r");
                     swApp.CommandInProgress = true;
                     swApp.Visible = true;
 

@@ -85,36 +85,13 @@ namespace BlueByte.SOLIDWORKS.Extensions
         /// <param name="suppressDialog">Suppress any dialogs.</param>
         /// <param name="timeout">30 seconds for time out.</param>
         /// <returns></returns>
-        public SldWorks GetNewInstance(string commandlineParameters = "/r /b", int timeout = 30)
+        public SldWorks GetNewInstance(string commandlineParameters = startSWNoJournalDialogAndSuppressAllDialogs, int timeout = 30)
         {
             var swApp = Extension.CreateSldWorks(commandlineParameters, timeout);
             return swApp;
         }
 
      
-        public SldWorks GetNewInstance(out Exception unloadaddinsException, bool unloadAddins = false, string commandlineArgs = startSWNoJournalDialogAndSuppressAllDialogs, int timeoutInSeconds = 30)
-        {
-            var swApp = Extension.CreateSldWorks(commandlineArgs, timeoutInSeconds);
-
-
-            if (unloadAddins)
-            {
-                try
-                {
-                    swApp.Visible = true;
-                    List<string> disabledAddIns = null;
-                    SldWorksHelper.UnloadAddIns(out disabledAddIns);
-                }
-                catch (Exception e)
-                {
-                    unloadaddinsException = e;
-                    return swApp;
-                }
-            }
-
-            unloadaddinsException = null;
-            return swApp;
-        }
 
       
 

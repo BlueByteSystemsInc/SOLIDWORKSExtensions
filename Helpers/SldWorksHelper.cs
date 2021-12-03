@@ -125,7 +125,7 @@ namespace BlueByte.SOLIDWORKS.Extensions.Helpers
             catch (SecurityException e)
             {
 
-                throw new Exception($"Failed to unload addins due to security permissions", e);
+                throw new UnloadAddInsFailedException($"Failed to unload addins due to security permissions", e);
             }
             
             return true;
