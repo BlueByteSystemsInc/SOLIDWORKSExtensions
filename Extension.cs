@@ -14,10 +14,9 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static BlueByte.SOLIDWORKS.Extensions.SOLIDWORKSInstanceManager;
 
-
-
-    namespace BlueByte.SOLIDWORKS.Extensions
+namespace BlueByte.SOLIDWORKS.Extensions
 {
 
 
@@ -249,13 +248,23 @@ using System.Threading.Tasks;
         /// <param name="suppressDialog">True to suppress SOLIDWORKS dialogs.</param>
         /// <returns>Pointer to the new instance of SOLIDWORKS.</returns>
         /// <exception cref="TimeoutException">Thrown if method times out.</exception>
-        public static SldWorks CreateSldWorks(string commandlineParameters = "", int timeoutSec = 30)
+        public static SldWorks CreateSldWorks(string commandlineParameters = "", Year_e _year =  Year_e.Latest, int timeoutSec = 30)
         {
             int[] years = ReleaseYears();
             if (years.Length == 0)
-                throw new Exception("SOLIDWORKS is not installed on this computer.");
+                throw new Exception($"SOLIDWORKS is not installed on this computer [{System.Environment.MachineName}].");
             Array.Sort(years);
+            
             int year = years.Last();
+
+            if (year != (int)Year_e.Latest)
+            {
+                if (years.Contains((int)_year) == false)
+                    throw new Exception($"Could not find installation directory for SOLIDWORKS. Year = [{year}].");
+
+                year = (int)_year;
+            }
+            
             var installationDirectory = GetSOLIDWORKSInstallationDirectory(year);
             if (installationDirectory == null)
                 throw new Exception($"Could not find installation directory for SOLIDWORKS. Year = [{year}].");

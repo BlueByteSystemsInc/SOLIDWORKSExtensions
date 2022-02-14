@@ -15,9 +15,9 @@ using System.Threading;
 
 namespace BlueByte.SOLIDWORKS.Extensions
 {
-   
 
-    public class SOLIDWORKSInstanceManager : ISOLIDWORKSInstanceManager
+
+    public partial class SOLIDWORKSInstanceManager : ISOLIDWORKSInstanceManager
     {
         public const string startSWNoJournalDialogAndSuppressAllDialogs = "/r /b";
 
@@ -85,12 +85,11 @@ namespace BlueByte.SOLIDWORKS.Extensions
         /// <param name="suppressDialog">Suppress any dialogs.</param>
         /// <param name="timeout">30 seconds for time out.</param>
         /// <returns></returns>
-        public SldWorks GetNewInstance(string commandlineParameters = startSWNoJournalDialogAndSuppressAllDialogs, int timeout = 30)
+        public SldWorks GetNewInstance(string commandlineParameters = startSWNoJournalDialogAndSuppressAllDialogs, Year_e year = Year_e.Latest, int timeout = 30)
         {
-            var swApp = Extension.CreateSldWorks(commandlineParameters, timeout);
+            var swApp = Extension.CreateSldWorks(commandlineParameters, year, timeout);
             return swApp;
         }
-
      
 
       
@@ -99,7 +98,7 @@ namespace BlueByte.SOLIDWORKS.Extensions
         /// Attempts to restart SOLIDWORKS.
         /// </summary>
         /// <param name="swApp"></param>
-        public void RestartInstance(ref SldWorks swApp, string commandLineParameters = "", int timeout = 30, int attempts = 5)
+        public void RestartInstance(ref SldWorks swApp, string commandLineParameters = "", Year_e year_ = Year_e.Latest, int timeout = 30, int attempts = 5)
         {
             if (attempts <= 2)
                 attempts = 5;
@@ -115,7 +114,7 @@ namespace BlueByte.SOLIDWORKS.Extensions
             {
                 try
                 {
-                    swApp =  GetNewInstance(commandLineParameters, timeout);
+                    swApp =  GetNewInstance(commandLineParameters, year_, timeout);
                     if (swApp != null)
                         break;
                 }
