@@ -26,6 +26,143 @@ namespace BlueByte.SOLIDWORKS.Extensions
 
         #region extension methods for ModelDoc
 
+
+        public static string[] GetHiddenComponents(this ModelDoc2 swModelDoc)
+        {
+
+            if (swModelDoc == null)
+                throw new ArgumentNullException(nameof(swModelDoc));
+
+            if (swModelDoc.GetType() != (int)swDocumentTypes_e.swDocASSEMBLY)
+                throw new Exception($"document is not assembly.");
+
+
+            var assembly = swModelDoc as AssemblyDoc;
+
+            if (assembly.GetComponentCount(true) == 0)
+                throw new Exception("Assembly no components");
+
+            var components = assembly.GetComponents(false) as object[];
+
+            var swComponents = components.Select(x => x as Component2);
+
+            var swPartComponents = swComponents.Where(x => x.IGetChildrenCount() == 0).ToArray();
+
+            var swPartsComponentSelectionStrings = swPartComponents.Select(x => x.GetSelectByIDString()).ToArray();
+
+          
+            var ret = default(string[]);
+            var retList = new List<string>();
+          
+            
+            retList.AddRange(swPartsComponentSelectionStrings);
+
+
+            swModelDoc.ViewZoomtofit2();
+
+
+            if (swModelDoc.GetModelViewCount() == 0)
+                throw new Exception($"{swModelDoc.GetTitle()} has no model views.");
+
+            // get all standards views 
+            var views = (object[])swModelDoc.GetModelViewNames();
+
+            foreach (var view in views)
+            {
+                swModelDoc.ShowNamedView(view.ToString());
+                var visibleComponents = assembly.GetVisibleComponentsInView();
+                if (visibleComponents != null)
+                {
+                    var visibleComponentsInView = visibleComponents as object[];
+
+                    foreach (var component in visibleComponentsInView)
+                    {
+                        var swComponent = component as Component2;
+                        if (swComponent != null)
+                        {
+                            if (swComponent.IGetChildrenCount() == 0)
+                            {
+                                // only select parts 
+                                var selectionStr = swComponent.GetSelectByIDString();
+                                retList.Remove(selectionStr);
+                                 
+                            }
+                        }
+                    }
+                }
+            }
+
+            return retList.ToArray();
+        }
+        public static Component2[] GetHiddenComponentObjects(this ModelDoc2 swModelDoc)
+        {
+
+            if (swModelDoc == null)
+                throw new ArgumentNullException(nameof(swModelDoc));
+
+            if (swModelDoc.GetType() != (int)swDocumentTypes_e.swDocASSEMBLY)
+                throw new Exception($"document is not assembly.");
+
+
+            var assembly = swModelDoc as AssemblyDoc;
+
+            if (assembly.GetComponentCount(true) == 0)
+                throw new Exception("Assembly no components");
+
+            var components = assembly.GetComponents(false) as object[];
+
+            var swComponents = components.Select(x => x as Component2);
+
+            var swPartComponents = swComponents.Where(x => x.IGetChildrenCount() == 0).ToArray();
+
+            var swPartsComponentSelectionStrings = swPartComponents.Select(x => x.GetSelectByIDString()).ToArray();
+
+
+            var retList = new List<string>();
+            var componentList = new List<Component2>();
+            
+
+            retList.AddRange(swPartsComponentSelectionStrings);
+            componentList.AddRange(swPartComponents);
+
+            swModelDoc.ViewZoomtofit2();
+
+
+            if (swModelDoc.GetModelViewCount() == 0)
+                throw new Exception($"{swModelDoc.GetTitle()} has no model views.");
+
+            // get all standards views 
+            var views = (object[])swModelDoc.GetModelViewNames();
+
+            foreach (var view in views)
+            {
+                swModelDoc.ShowNamedView(view.ToString());
+                var visibleComponents = assembly.GetVisibleComponentsInView();
+                if (visibleComponents != null)
+                {
+                    var visibleComponentsInView = visibleComponents as object[];
+
+                    foreach (var component in visibleComponentsInView)
+                    {
+                        var swComponent = component as Component2;
+                        if (swComponent != null)
+                        {
+                            if (swComponent.IGetChildrenCount() == 0)
+                            {
+                                // only select parts 
+                                var selectionStr = swComponent.GetSelectByIDString();
+                                retList.Remove(selectionStr);
+                                componentList.Remove(swComponent);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return componentList.ToArray();
+        }
+
+
         /// <summary>
         /// Removes all appearances. This method does not update graphics. Use <see cref="ModelDoc2.Rebuild3"/> to see changes.
         /// </summary>
@@ -257,10 +394,10 @@ namespace BlueByte.SOLIDWORKS.Extensions
             
             int year = years.Last();
 
-            if (year != (int)Year_e.Latest)
+            if (_year != (int)Year_e.Latest)
             {
                 if (years.Contains((int)_year) == false)
-                    throw new Exception($"Could not find installation directory for SOLIDWORKS. Year = [{year}].");
+                    throw new Exception($"Could not find installation directory for SOLIDWORKS. [{_year}].");
 
                 year = (int)_year;
             }
