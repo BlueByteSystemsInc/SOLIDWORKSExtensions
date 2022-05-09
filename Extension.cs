@@ -507,7 +507,7 @@ namespace BlueByte.SOLIDWORKS.Extensions
                     {
                         object app;
                         rot.GetObject(curMoniker, out app);
-                        return app as SldWorks;
+                        return (SldWorks)app;
                     }
                 }
             }

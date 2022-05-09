@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Enums.cs" />
     <Compile Include="Extension.cs" />
+    <Compile Include="Helpers\ColorHelper.cs" />
     <Compile Include="Helpers\ComponentHelper.cs" />
     <Compile Include="Helpers\ModelDocHelper.cs" />
     <Compile Include="Helpers\SelectionHelper.cs" />

@@ -45,7 +45,7 @@ namespace Tests
                 else
                 {
                     
-                    swApp = manager.GetNewInstance("/b /r", SOLIDWORKSInstanceManager.Year_e.Year2021);
+                    swApp = manager.GetNewInstance("/b /r", SOLIDWORKSInstanceManager.Year_e.Year2022);
                     swApp.CommandInProgress = true;
                     swApp.Visible = true;
 
