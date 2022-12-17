@@ -18,7 +18,21 @@ using static BlueByte.SOLIDWORKS.Extensions.SOLIDWORKSInstanceManager;
 
 namespace BlueByte.SOLIDWORKS.Extensions
 {
-
+    public enum swAdvancedOpenDocOptions_e
+    {
+        swOpenDocOptions_Silent = 1,
+        swOpenDocOptions_ReadOnly = 2,
+        swOpenDocOptions_ViewOnly = 4,
+        swOpenDocOptions_RapidDraft = 8,
+        swOpenDocOptions_LoadModel = 16,
+        swOpenDocOptions_AutoMissingConfig = 32,
+        swOpenDocOptions_OverrideDefaultLoadLightweight = 64,
+        swOpenDocOptions_LoadLightweight = 128,
+        swOpenDocOptions_DontLoadHiddenComponents = 256,
+        swOpenDocOptions_LoadExternalReferencesInMemory = 512,
+        swOpenDocOptions_OpenDetailingMode = 1024,
+        swOpenDocOptions_QuickView = -1,
+    }
 
 
     public static class Extension
@@ -202,7 +216,7 @@ namespace BlueByte.SOLIDWORKS.Extensions
         /// <param name="openOptions">Open document options.</param>
         /// <param name="configurationName">Configuration name.</param>
         /// <returns>A tuple of true or false and a <see cref="ModelDoc2"/></returns>
-        public static Tuple<bool,ModelDoc2> OpenDocument(this SldWorks swApp, string filename, out string[] errors, out string[] warnings, swOpenDocOptions_e openOptions = swOpenDocOptions_e.swOpenDocOptions_Silent, string configurationName = "")
+        public static Tuple<bool,ModelDoc2> OpenDocument(this SldWorks swApp, string filename, out string[] errors, out string[] warnings, swAdvancedOpenDocOptions_e openOptions = swAdvancedOpenDocOptions_e.swOpenDocOptions_Silent, string configurationName = "")
         {
             warnings = new string[] { };
             errors = new string[] { };
@@ -244,7 +258,27 @@ namespace BlueByte.SOLIDWORKS.Extensions
                 else
                     throw new Exception($"Cannot open file in SOLIDWORKS. Unknown extension [{System.IO.Path.GetFileName(filename)}].");
 
-                ModelDoc2 Document = swApp.OpenDoc6(filename, (int)type, (int)openOptions, configurationName, ref Error, ref Warning) as ModelDoc2;
+
+                ModelDoc2 Document = default(ModelDoc2);
+                
+                if (openOptions == swAdvancedOpenDocOptions_e.swOpenDocOptions_QuickView)
+                {
+                    var spec = swApp.GetOpenDocSpec(filename) as IDocumentSpecification;
+                    spec.Selective = true;
+                    spec.ConfigurationName = configurationName;
+                    spec.Silent = true;
+                    spec.DocumentType = (int)type;
+                    Document = swApp.OpenDoc7(spec);
+
+                   
+
+                    Error = spec.Error;
+                    Warning = spec.Warning;
+
+                }
+                else 
+
+                 Document = swApp.OpenDoc6(filename, (int)type, (int)openOptions, configurationName, ref Error, ref Warning) as ModelDoc2;
                 ErrorsEnum = (swOpenError)Error;
                 WarningsEnum = (swOpenWarning)Warning;
                 errors = GetDescriptions(GetFlags(ErrorsEnum));

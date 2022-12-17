@@ -211,23 +211,23 @@ namespace BlueByte.SOLIDWORKS.Helpers
             return ModelDocHelper.GetSOLIDWORKSDocumentType(pathName);
         }
 
-        //public static List<Body> GetBodies(this Feature feature)
-        //{
-        //    var subFeature = default(Feature);
-        //    var swComponent = feature.GetSpecificFeature2() as Component2;
-        //    if (swComponent != null)
-        //    {
-        //        var componentBodies = (swComponent.GetBodies2((int)swBodyType_e.swAllBodies) as object[]).Cast<Body>().ToList();
-                
-        //        subFeature = swComponent.FirstFeature();
+        /// <summary>
+        /// Returns the component's name as formatted in the feature tree.
+        /// </summary>
+        /// <param name="component">The component.</param>
+        /// <returns></returns>
+        public static string NameLikeFeatureTree(this Component2 component)
+        {
+            var name = component.Name2;
+            var arr = name.Split(new char[] { '/' });
 
-        //        while (subFeature != null)
-        //        {
-        //            GetModelDocs(subFeature);
-        //            subFeature = subFeature.GetNextFeature() as Feature;
-        //        }
-        //    }
-        //}
+            var NameWithoutFormattedInstance = arr[arr.Length - 1];
+
+            arr = NameWithoutFormattedInstance.Split(new char[] { '-' });
+
+            return $"{string.Join("-", arr.Reverse().Skip(1).Reverse())}<{arr.Last()}>";
+        }
+
     }
     public static class MateHelper
     {
