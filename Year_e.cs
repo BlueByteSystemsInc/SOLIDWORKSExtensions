@@ -26,6 +26,8 @@ namespace BlueByte.SOLIDWORKS.Extensions
             Year2021 =  2021,
             [Description("2022")]
             Year2022 = 2022,
+            [Description("2023")]
+            Year2023 = 2023,
             [Description("Latest")]
             Latest = 0
         
