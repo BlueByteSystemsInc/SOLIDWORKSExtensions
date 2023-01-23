@@ -4,7 +4,7 @@
     <!--*-->
     <id>BlueByte.SOLIDWORKS.Extensions</id>
     <!--*-->
-    <version>2021.34.0</version>
+    <version>2021.35.0</version>
     <title>BlueByte.SOLIDWORKS.Extensions</title>
     <!--*-->
     <authors>Blue Byte Systems, Inc.</authors>
@@ -19,7 +19,7 @@
     <description>Extension methods and wrapper classes for SOLIDWORKS API.</description>
     <!--*-->
     <releaseNotes>Extension methods and wrapper classes for SOLIDWORKS API.</releaseNotes>
-    <copyright>Copyright ©  2022</copyright>
+    <copyright>Copyright ©  2023</copyright>
     <tags>
     </tags>
     <dependencies>
