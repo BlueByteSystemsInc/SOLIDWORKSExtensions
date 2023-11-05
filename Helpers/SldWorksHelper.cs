@@ -35,8 +35,61 @@ namespace BlueByte.SOLIDWORKS.Extensions.Helpers
         SW_FORCEMINIMIZE = 11,
         SW_MAX = 11,
     }
+
+
+    public enum TraverseFlag_e
+    {
+        False = 0,
+        True = 1
+    }
+    public enum SearchFlag_e
+    {
+        DoNotUseSearchRules = 0,
+        UseSearchRules = 1
+    }
     public static class SldWorksHelper
     {
+
+
+
+        /// <summary>
+        /// Updates the reference.
+        /// </summary>
+        /// <param name="swApp">The sw application.</param>
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="oldReference">The old reference.</param>
+        /// <param name="newReference">The new reference.</param>
+        /// <returns></returns>
+        /// <exception cref="System.Exception">
+        /// Could not find any references.
+        /// or
+        /// </exception>
+        public static bool UpdateReference(this SldWorks swApp, string fileName, string oldReference, string newReference)
+        {
+            var count = swApp.GetDocumentDependenciesCount(fileName,(int)TraverseFlag_e.False,(int)SearchFlag_e.DoNotUseSearchRules);
+
+            if (count == 0)
+                throw new Exception($"Could not find any references.");
+
+            var references = swApp.GetDocumentDependencies2(fileName, false, false, false) as string[];
+
+            var dictionary = new Dictionary<string, string>();
+
+            for (int i = 0; i < references.Length-1; i = i+2)
+            {
+                dictionary.Add(references[i], references[i + 1]);
+            }
+
+            if (dictionary.Keys.ToList().Contains(System.IO.Path.GetFileName(oldReference)) == false)
+                throw new Exception($"{System.IO.Path.GetFileName(oldReference)} is not found in this document");
+
+            return swApp.ReplaceReferencedDocument(fileName, oldReference, newReference);
+
+        }
+
+
+        
+
 
         public const string ADDINS_STARTUP_REG_KEY = @"Software\SolidWorks\AddInsStartup";
 

@@ -6,6 +6,22 @@ using System.Linq;
 
 namespace BlueByte.SOLIDWORKS.Helpers
 {
+
+    /// <summary>
+    /// Sheet metal options
+    /// </summary>
+    public enum SheetMetalOptions
+        {
+            SheetMetalOptions_ExportGeometry = 1,
+            SheetMetalOptions_IncludeHiddenLines = 2,
+            SheetMetalOptions_ExportBendLines = 4,
+            SheetMetalOptions_IncludeSketches = 8,
+            SheetMetalOptions_MergeCoPlanarFaces = 16,
+            SheetMetalOptions_ExportLibraryFeatures = 32,
+            SheetMetalOptions_ExportFormTools = 64,
+            SheetMetalOptions_ExportBoundingBox = 4096
+        }
+
     public static class ModelDocHelper
     {
         #region Public Enums
@@ -19,6 +35,209 @@ namespace BlueByte.SOLIDWORKS.Helpers
         #endregion
 
         #region Public Methods
+
+
+
+        /// <summary>
+        /// Exports the flat pattern.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <param name="exportOptions">The export options.</param>
+        /// <param name="fileName">Name of the file.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">nameof(model)</exception>
+        /// <exception cref="Exception">
+        /// $"{model.GetTitle()} is not a part document.
+        /// or
+        /// $"{model.GetTitle()} is not a sheet metal part document.
+        /// </exception>
+        public static bool ExportFlatPattern(this ModelDoc2 model, SheetMetalOptions exportOptions, string fileName)
+        {
+            if (model == null)
+                throw new ArgumentNullException(nameof(model)); 
+
+            if (model.GetType() != (int)swDocumentTypes_e.swDocPART)
+                throw new Exception($"{model.GetTitle()} is not a part document.");
+
+            var partDoc = model as PartDoc;
+
+
+            if (model.IsSheetMetal() == false)
+            throw new Exception($"{model.GetTitle()} is not a sheet metal part document.");
+            
+
+            var sModelName = model.GetPathName();
+            object varAlignment;
+            double[] dataAlignment = new double[12];
+
+            dataAlignment[0] = 0.0;
+            dataAlignment[1] = 0.0;
+            dataAlignment[2] = 0.0;
+            dataAlignment[3] = 1.0;
+            dataAlignment[4] = 0.0;
+            dataAlignment[5] = 0.0;
+            dataAlignment[6] = 0.0;
+            dataAlignment[7] = 1.0;
+            dataAlignment[8] = 0.0;
+            dataAlignment[9] = 0.0;
+            dataAlignment[10] = 0.0;
+            dataAlignment[11] = 1.0;
+            varAlignment = dataAlignment;
+            return partDoc.ExportToDWG2(fileName, sModelName, (int)swExportToDWG_e.swExportToDWG_ExportSheetMetal, true, varAlignment, false, false, (int)exportOptions, null);
+        }
+
+
+        /// <summary>
+        /// Gets the reference document from drawing.
+        /// </summary>
+        /// <param name="modelDoc">The model document.</param>
+        /// <returns></returns>
+        /// <exception cref="System.Exception">
+        /// </exception>
+        public static ModelDoc2 GetReferenceDocumentFromDrawing(this ModelDoc2 modelDoc)
+        {
+           
+                var drawing = modelDoc as DrawingDoc;
+
+            if (drawing == null)
+                throw new Exception($"{modelDoc.GetTitle()} is not a drawing document.");
+
+
+            if (drawing.IsDetailingMode())
+                throw new Exception($"{modelDoc.GetTitle()} is open in detailing mode. Could get referenced document to export flat pattern.");
+
+
+            var referencedDocument = default(ModelDoc2);
+
+
+
+                    var views = drawing.GetViews() as object[];
+                    if (views != null)
+                    {
+                        var drawingViews = views.First() as object[];
+                        foreach (var view in drawingViews)
+                        {
+                            var swView = view as SolidWorks.Interop.sldworks.View;
+                            if (swView != null)
+                            {
+                                referencedDocument = swView.ReferencedDocument;
+                        if (referencedDocument != null)
+                            break;
+                            }
+                        }                        
+                    }
+
+
+
+            return referencedDocument;
+        }
+
+        /// <summary>
+        /// Determines whether [is sheet metal] [the specified model].
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns>
+        ///   <c>true</c> if [is sheet metal] [the specified model]; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">nameof(model)</exception>
+        /// <exception cref="Exception">$"{model.GetTitle()} is not a part document.</exception>
+        public static bool IsSheetMetal(this ModelDoc2 model)
+        {
+          
+            var ret = false; 
+
+               if (model == null)
+                throw new ArgumentNullException(nameof(model)); 
+
+            if (model.GetType() != (int)swDocumentTypes_e.swDocPART)
+                throw new Exception($"{model.GetTitle()} is not a part document.");
+
+
+            var partDoc = model as PartDoc;
+
+            var isSheetMetal = true;
+
+            var bodies = partDoc.GetBodies2((int)swBodyType_e.swSolidBody, true);
+
+            if (bodies != null)
+            {
+                var swBodies = (bodies as object[]).Cast<Body2>();
+                if (swBodies != null)
+                    foreach (var swBody in swBodies)
+                    {
+                        isSheetMetal = swBody.IsSheetMetal();
+                        if (isSheetMetal)
+                            break;
+                    }
+
+            }
+
+            if (isSheetMetal)
+                return true;
+
+            var sheetMetal = (model.FeatureManager.GetFeatures(true) as object[]).Cast<Feature>().ToList().FirstOrDefault(i => i.GetTypeName2() == "SheetMetal");
+
+            if (sheetMetal != null)
+                isSheetMetal = true;
+
+            ret = isSheetMetal;
+
+            return ret; 
+       
+        }
+            
+
+        /// <summary>
+        /// Converts to meters using the document's length unit.
+        /// </summary>
+        /// <param name="swModelDoc">The sw model document.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException">Conversion from {lengtUnit.ToString()} to meters not implemented by this method</exception>
+        public static double ConvertToMeters(this ModelDoc2 swModelDoc, double value)
+        {
+            double factor = 1000.0;
+            var ar = new List<double>();
+
+            var lengtUnit = (swLengthUnit_e)swModelDoc.LengthUnit;
+            switch (lengtUnit)
+            {
+                case swLengthUnit_e.swMM:
+                    factor = 1 / 1000.0;
+                    break;
+
+                case swLengthUnit_e.swCM:
+                    factor = 1 / 100.0;
+                    break;
+
+                case swLengthUnit_e.swMETER:
+                    factor = 1;
+                    break;
+
+                case swLengthUnit_e.swINCHES:
+                    factor = 1 / 39.37;
+                    break;
+
+                case swLengthUnit_e.swFEET:
+                    factor = 1 / 3.281;
+                    break;
+
+                case swLengthUnit_e.swFEETINCHES:
+                    factor = 1 / 3.281;
+                    break;
+
+                case swLengthUnit_e.swUIN:
+                case swLengthUnit_e.swANGSTROM:
+                case swLengthUnit_e.swNANOMETER:
+                case swLengthUnit_e.swMICRON:
+                case swLengthUnit_e.swMIL:
+                default:
+                    throw new NotImplementedException($"Conversion from {lengtUnit.ToString()} to meters not implemented by this method");
+            }
+
+
+            return value * factor;
+        }
 
         public static bool areVectorsCollinear(MathVector V, MathVector U)
         {
