@@ -1,4 +1,5 @@
 ﻿using BlueByte.SOLIDWORKS.Extensions;
+using BlueByte.SOLIDWORKS.Extensions.Enums;
 using BlueByte.SOLIDWORKS.Extensions.Helpers;
 using BlueByte.SOLIDWORKS.Helpers;
 using Microsoft.Win32;
@@ -19,14 +20,14 @@ namespace Tests
 
         static void Main(string[] args)
         {
-            GetReferencedDocument_Test();
+            GetSheetMetalFeatures_Test();
             //ExportFlatPattern_Test();
 
         }
 
         
         
-        private static void GetReferencedDocument_Test()
+        private static void GetSheetMetalFeatures_Test()
         {
             var instanceManage = new SOLIDWORKSInstanceManager();
             var swApp = instanceManage.GetNewInstance();
@@ -41,14 +42,25 @@ namespace Tests
             string[] warnings;
             string[] errors;
 
-            var fileName = @"C:\SOLIDWORKSPDM\Bluebyte\API\mrl\ENGINEERING\DOCUMENT NUMBERS\0021000\00218XX\0021802.SLDDRW";
+            var fileName = @"C:\SOLIDWORKSPDM\Bluebyte\API\Sandbox\Grill Assembly\range_burner_insert_&.SLDPRT";
 
 
             var doc = swApp.OpenDocument(fileName, out errors, out warnings);
 
             var model = doc.Item2;
 
-            var ret = model.GetReferenceDocumentFromDrawing();
+
+            var features = model.FeatureManager.GetFeatures(false) as object[];
+
+            foreach (var feature in features)
+            {
+                var swFeature = feature as Feature;
+
+                SheetMetalFeatureType_e t;
+                var isSheetMetal = swFeature.IsSheetMetal(out t);
+
+                Console.WriteLine($"{swFeature.Name.PadRight(50)} - IsSheetMetal {isSheetMetal} - {t.ToString()} ");
+            }
 
 
             swApp.CloseAllDocuments(false);

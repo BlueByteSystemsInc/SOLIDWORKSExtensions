@@ -7,7 +7,35 @@ using System.Threading.Tasks;
 
 namespace BlueByte.SOLIDWORKS.Extensions.Enums
 {
-        public enum swOpenError
+    public enum SheetMetalFeatureType_e
+    {
+        Unknown,
+        SMBaseFlange,
+        BreakCorner,
+        CornerTrim,
+        CrossBreak,
+        EdgeFlange,
+        FlatPattern,
+        FlattenBends,
+        Fold,
+        FormToolInstance,
+        Hem,
+        Jog,
+        LoftedBend,
+        NormalCut,
+        OneBend,
+        ProcessBends,
+        SheetMetal,
+        SketchBend,
+        SM3dBend,
+        SMGusset,
+        SMMiteredFlange,
+        TemplateSheetMetal,
+        ToroidalBend,
+        UnFold
+
+    }
+    public enum swOpenError
         {
             [Description("No Error")]
             swNoError = 0,
