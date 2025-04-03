@@ -19,7 +19,9 @@ namespace BlueByte.SOLIDWORKS.Extensions
 
     public partial class SOLIDWORKSInstanceManager : ISOLIDWORKSInstanceManager
     {
-        public const string startSWNoJournalDialogAndSuppressAllDialogs = "/r /b";
+        public const string startSWNoJournalDialogAndSuppressAllDialogs = "/r";
+
+        public const string startSWBatch = "/b";
 
         [DllImport("ole32.dll")]
         public static extern int GetRunningObjectTable(int reserved, out IRunningObjectTable port);
@@ -98,7 +100,7 @@ namespace BlueByte.SOLIDWORKS.Extensions
         /// Attempts to restart SOLIDWORKS.
         /// </summary>
         /// <param name="swApp"></param>
-        public void RestartInstance(ref SldWorks swApp, string commandLineParameters = "", Year_e year_ = Year_e.Latest, int timeout = 30, int attempts = 5)
+        public void RestartInstance(ref SldWorks swApp, string commandLineParameters = startSWNoJournalDialogAndSuppressAllDialogs, Year_e year_ = Year_e.Latest, int timeout = 30, int attempts = 5)
         {
             if (attempts <= 2)
                 attempts = 5;

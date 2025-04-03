@@ -419,7 +419,7 @@ namespace BlueByte.SOLIDWORKS.Extensions
         /// <param name="suppressDialog">True to suppress SOLIDWORKS dialogs.</param>
         /// <returns>Pointer to the new instance of SOLIDWORKS.</returns>
         /// <exception cref="TimeoutException">Thrown if method times out.</exception>
-        public static SldWorks CreateSldWorks(string commandlineParameters = "", Year_e _year =  Year_e.Latest, int timeoutSec = 30)
+        public static SldWorks CreateSldWorks(string commandlineParameters = startSWNoJournalDialogAndSuppressAllDialogs, Year_e _year =  Year_e.Latest, int timeoutSec = 30)
         {
             int[] years = ReleaseYears();
             if (years.Length == 0)
